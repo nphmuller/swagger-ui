@@ -12,7 +12,8 @@ export default class OperationContainer extends PureComponent {
 
     this.state = {
       tryItOutEnabled,
-      executeInProgress: false
+      executeInProgress: false,
+      abortController: null
     }
   }
 
@@ -95,7 +96,10 @@ export default class OperationContainer extends PureComponent {
     const resolvedSubtree = this.getResolvedSubtree()
 
     if (response !== prevProps.response) {
-      this.setState({ executeInProgress: false })
+      this.setState({
+        executeInProgress: false,
+        abortController: null
+      })
     }
 
     if (isShown && resolvedSubtree === undefined) {
@@ -114,6 +118,15 @@ export default class OperationContainer extends PureComponent {
   }
 
   onCancelClick=() => {
+    if (this.state.executeInProgress && this.state.abortController) {
+      this.state.abortController.abort()
+      this.setState({
+        executeInProgress: false,
+        abortController: null
+      })
+      return
+    }
+
     this.setState({tryItOutEnabled: !this.state.tryItOutEnabled})
   }
 
@@ -146,7 +159,22 @@ export default class OperationContainer extends PureComponent {
   }
 
   onExecute = () => {
-    this.setState({ executeInProgress: true })
+    const abortController = typeof AbortController === "function" ? new AbortController() : null
+
+    this.setState({
+      executeInProgress: true,
+      abortController
+    })
+
+    return {
+      abortSignal: abortController?.signal
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.state.abortController) {
+      this.state.abortController.abort()
+    }
   }
 
   getResolvedSubtree = () => {
