@@ -63,6 +63,7 @@ describe("<OperationContainer/>", function () {
 
     expect(abortSignal.aborted).toEqual(false)
     expect(wrapper.state("executeInProgress")).toEqual(true)
+    expect(abortSignal).toBe(wrapper.state("abortController").signal)
 
     wrapper.instance().onCancelClick()
 

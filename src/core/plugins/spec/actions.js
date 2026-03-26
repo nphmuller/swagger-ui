@@ -475,7 +475,7 @@ export const executeRequest = (req) =>
       } )
       .catch(
         err => {
-          if(err.name === "AbortError") {
+          if (err.name === "AbortError") {
             return
           }
 

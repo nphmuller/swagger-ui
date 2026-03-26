@@ -171,6 +171,10 @@ describe("spec plugin - actions", function(){
       })
 
       await expect(executeFn(system)).resolves.toBeUndefined()
+      expect(system.fn.buildRequest).toHaveBeenCalledTimes(1)
+      expect(system.fn.execute).toHaveBeenCalledTimes(1)
+      await system.fn.execute.mock.calls[0][0].requestInterceptor(system.fn.execute.mock.calls[0][0])
+      expect(system.specActions.setMutatedRequest).toHaveBeenCalledTimes(1)
       expect(system.specActions.setResponse).not.toHaveBeenCalled()
     })
   })

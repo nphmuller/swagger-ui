@@ -159,7 +159,7 @@ export default class OperationContainer extends PureComponent {
   }
 
   onExecute = () => {
-    const abortController = typeof AbortController === "function" ? new AbortController() : null
+    const abortController = typeof AbortController !== "undefined" ? new AbortController() : null
 
     this.setState({
       executeInProgress: true,
