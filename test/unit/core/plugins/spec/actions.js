@@ -142,6 +142,41 @@ describe("spec plugin - actions", function(){
       expect(system.specActions.setMutatedRequest.mock.calls.length).toEqual(1)
       expect(system.specActions.setRequest.mock.calls.length).toEqual(1)
     })
+
+    it("should ignore AbortError rejections", async () => {
+      const system = {
+        fn: {
+          buildRequest: jest.fn((req) => req),
+          execute: jest.fn().mockRejectedValue(new DOMException("Request aborted", "AbortError"))
+        },
+        specActions: {
+          setMutatedRequest: jest.fn(),
+          setRequest: jest.fn(),
+          setResponse: jest.fn()
+        },
+        specSelectors: {
+          url: () => "https://example.test/openapi.json",
+          isOAS3: () => false
+        },
+        getConfigs: () => ({
+          requestInterceptor: jest.fn((request) => request),
+          responseInterceptor: jest.fn()
+        })
+      }
+
+      let executeFn = executeRequest({
+        pathName: "/one",
+        method: "GET",
+        operation: fromJS({operationId: "getOne"})
+      })
+
+      await expect(executeFn(system)).resolves.toBeUndefined()
+      expect(system.fn.buildRequest).toHaveBeenCalledTimes(1)
+      expect(system.fn.execute).toHaveBeenCalledTimes(1)
+      await system.fn.execute.mock.calls[0][0].requestInterceptor(system.fn.execute.mock.calls[0][0])
+      expect(system.specActions.setMutatedRequest).toHaveBeenCalledTimes(1)
+      expect(system.specActions.setResponse).not.toHaveBeenCalled()
+    })
   })
 
   xit("should call specActions.setResponse, when fn.execute resolves", function(){

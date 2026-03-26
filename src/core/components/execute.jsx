@@ -59,11 +59,12 @@ export default class Execute extends Component {
 
   handleValidationResultPass = () => {
     let { specActions, operation, path, method } = this.props
+    let extras = {}
     if (this.props.onExecute) {
       // loading spinner
-      this.props.onExecute()
+      extras = this.props.onExecute() || {}
     }
-    specActions.execute({ operation, path, method })
+    specActions.execute({ operation, path, method, ...extras })
   }
 
   handleValidationResultFail = () => {

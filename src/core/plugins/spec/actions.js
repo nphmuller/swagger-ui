@@ -475,6 +475,10 @@ export const executeRequest = (req) =>
       } )
       .catch(
         err => {
+          if (err.name === "AbortError") {
+            return
+          }
+
           // console.error(err)
           if(err.message === "Failed to fetch") {
             err.name = ""
